@@ -36,6 +36,30 @@ app.post("/pubsub", (req, res) => {
   }
 });
 
+app.post("/toPubSub", (req, res) => {
+  try {
+    // Validar el mensaje decodificado
+    const decodedMessage: DecodedMessage = validateDecodedMessage(req.body);
+
+    // Convertir el mensaje a base64
+    const jsonData = JSON.stringify(decodedMessage);
+    const base64Data = Buffer.from(jsonData).toString("base64");
+
+    // Crear el objeto Pub/Sub
+    const pubSubMessage: PubSubPayload = {
+      message: {
+        data: base64Data,
+        publishTime: new Date().toISOString(),
+        messageId: `${Date.now()}`,
+      },
+    };
+
+    res.status(200).json(pubSubMessage);
+  } catch (error: any) {
+    res.status(400).send(error.message);
+  }
+});
+
 const PORT = process.env.PORT ?? 3000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
